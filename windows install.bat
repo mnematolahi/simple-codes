@@ -32,15 +32,9 @@ echo Installing Microsoft Build Tools 2019...
 choco install visualstudio2019buildtools -y
 
 REM Download file
-wget https://example.com/file.zip -O C:\path\to\save\file.zip
+REM wget https://example.com/file.zip -O C:\path\to\save\file.zip
 
 REM now there is a .exe file in your folder. Run and Enjoy it!
 
 
-
-
-
-REM Copy file
-copy C:\path\to\source\file.txt C:\path\to\destination\file.txt
-
-echo Done.
+echo ALL Done.
