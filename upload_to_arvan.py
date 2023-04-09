@@ -5,7 +5,7 @@ arvan_username = "your_arvan_username"
 arvan_password = "your_arvan_password"
 
 # Define the URL of the file to be downloaded
-file_url = "https://ufile.io/m0707m1f"
+file_url = "https://fsdfsdfsdfsdfsdf.com"
 
 # Define the local file path where the downloaded file will be saved
 local_file_path = "file_to_upload.zip"
