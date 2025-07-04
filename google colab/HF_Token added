@@ -22,11 +22,25 @@ base_dir = "/content/drive/MyDrive/AI_Offline_Repo_FULL"
 archive_name = "AI_Offline_Repo_FULL.tar.gz"
 archive_path = f"/content/drive/MyDrive/{archive_name}"
 
+
 python_libraries = list(set([
-    "torch", "torchvision", "torchaudio", "tensorflow", "transformers", "accelerate", "bitsandbytes",
-    "datasets", "peft", "Pillow", "sentence-transformers", "tqdm", "langchain", "langchain-community",
-    "langchain-text-splitters", "chromadb", "PyMuPDF", "pdf2image", "PyYAML", "streamlit",
-    "streamlit-mermaid", "gradio", "huggingface_hub", "jupyter", "faiss-cpu"
+    # --- Core AI & Deep Learning ---
+    "torch", "torchvision", "torchaudio", "tensorflow", "scikit-learn", 
+    "pandas", "numpy", "matplotlib", "seaborn",
+
+    # --- Hugging Face Ecosystem ---
+    "transformers", "accelerate", "bitsandbytes", "datasets", "peft", 
+    "huggingface_hub", "optimum", "auto-gptq",
+
+    # --- LLM Inference & RAG ---
+    "langchain", "langchain-community", "langchain-text-splitters", 
+    "chromadb", "faiss-cpu", "sentence-transformers", "llama-cpp-python",
+
+    # --- Data Handling & Utilities ---
+    "PyMuPDF", "pdf2image", "PyYAML", "Pillow", "tqdm", "jupyter",
+    
+    # --- App, UI & API Building ---
+    "streamlit", "streamlit-mermaid", "gradio", "fastapi", "uvicorn",
 ]))
 
 models_to_download = {
