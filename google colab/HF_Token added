@@ -1,0 +1,86 @@
+# --- مرحله ۱: اتصال به درایو و ورود به حساب Hugging Face ---
+from google.colab import drive
+from google.colab import userdata
+from huggingface_hub import login
+import os
+
+# اتصال به گوگل درایو
+drive.mount('/content/drive')
+
+# خواندن توکن از قسمت Secrets و ورود به حساب
+try:
+    hf_token = userdata.get('HF_TOKEN')
+    login(token=hf_token)
+    print("✅ با موفقیت به حساب Hugging Face وارد شدید.")
+except Exception as e:
+    print("❌ خطایی در ورود به حساب رخ داد. مطمئن شوید توکن را در قسمت Secrets ذخیره کرده‌اید.")
+    print(e)
+
+
+# --- مرحله ۲: تنظیمات اصلی (بدون تغییر) ---
+base_dir = "/content/drive/MyDrive/AI_Offline_Repo_FULL"
+archive_name = "AI_Offline_Repo_FULL.tar.gz"
+archive_path = f"/content/drive/MyDrive/{archive_name}"
+
+python_libraries = list(set([
+    "torch", "torchvision", "torchaudio", "tensorflow", "transformers", "accelerate", "bitsandbytes",
+    "datasets", "peft", "Pillow", "sentence-transformers", "tqdm", "langchain", "langchain-community",
+    "langchain-text-splitters", "chromadb", "PyMuPDF", "pdf2image", "PyYAML", "streamlit",
+    "streamlit-mermaid", "gradio", "huggingface_hub", "jupyter", "faiss-cpu"
+]))
+
+models_to_download = {
+    "gemma-2b-it": "TheBloke/gemma-2b-it-GGUF/gemma-2b-it.Q4_K_M.gguf",
+    "gemma-7b-it": "TheBloke/gemma-7b-it-GGUF/gemma-7b-it.Q5_K_M.gguf",
+    "llama-3-8b-instruct": "TheBloke/Meta-Llama-3-8B-Instruct-GGUF/meta-llama-3-8b-instruct.Q4_K_M.gguf",
+    "llama-3-70b-instruct": "TheBloke/Meta-Llama-3-70B-Instruct-GGUF/meta-llama-3-70b-instruct.Q4_K_M.gguf",
+    "deepseek-coder-v2-lite": "TheBloke/deepseek-coder-v2-lite-instruct-GGUF/deepseek-coder-v2-lite-instruct.Q4_K_M.gguf",
+    "deepseek-llm-7b-chat": "TheBloke/deepseek-llm-7b-chat-GGUF/deepseek-llm-7b-chat.Q5_K_M.gguf",
+    "qwen-1.5-4b-chat": "TheBloke/Qwen1.5-4B-Chat-GGUF/qwen1_5-4b-chat.Q5_K_M.gguf",
+    "qwen-1.5-14b-chat": "TheBloke/Qwen1.5-14B-Chat-GGUF/qwen1_5-14b-chat.Q5_K_M.gguf"
+}
+
+# --- مراحل ۳ و ۴ (بدون تغییر) ---
+pypi_dir = os.path.join(base_dir, "PyPI_Libraries")
+models_dir = os.path.join(base_dir, "AI_Models")
+github_dir = os.path.join(base_dir, "GitHub_Tools")
+
+os.makedirs(pypi_dir, exist_ok=True)
+os.makedirs(models_dir, exist_ok=True)
+os.makedirs(github_dir, exist_ok=True)
+print(f"ساختار پوشه در مسیر {base_dir} ایجاد شد.")
+
+# ۱. دانلود کتابخانه‌های PyPI
+print("\n⏳ شروع دانلود کتابخانه‌های PyPI...")
+requirements_path = "/content/requirements.txt"
+with open(requirements_path, "w") as f:
+    f.write("\n".join(python_libraries))
+!pip download -r {requirements_path} -d {pypi_dir}
+print("✅ دانلود کتابخانه‌های PyPI تمام شد.")
+
+# ۲. دانلود مدل‌های هوش مصنوعی
+print("\n⏳ شروع دانلود مدل‌های هوش مصنوعی...")
+# !pip install -q huggingface_hub # دیگر لازم نیست چون در ابتدا import کردیم
+for name, path in models_to_download.items():
+    try:
+        parts = path.split('/')
+        repo_id = f"{parts[0]}/{parts[1]}"
+        filename = parts[2]
+        print(f"--- در حال دانلود مدل: {name} ---")
+        !huggingface-cli download {repo_id} {filename} --local-dir {models_dir}/{name} --local-dir-use-symlinks False
+    except Exception as e:
+        print(f"เกิดข้อผิดพลาดในการดาวน์โหลดโมเดล {name}: {e}") # پیام خطا در صورت بروز مشکل
+print("✅ دانلود مدل‌های هوش مصنوعی تمام شد.")
+
+# ۳. دانلود ابزارهای گیت‌هاب
+print("\n⏳ شروع دانلود ابزارهای گیت‌هاب (llama.cpp و text-generation-webui)...")
+!git clone https://github.com/ggerganov/llama.cpp.git {github_dir}/llama.cpp
+!git clone https://github.com/oobabooga/text-generation-webui.git {github_dir}/text-generation-webui
+print("✅ دانلود ابزارهای گیت‌هاب تمام شد.")
+
+# --- مرحله ۴: فشرده‌سازی همه چیز در یک فایل ---
+print(f"\n⏳ شروع فشرده‌سازی کل پوشه در فایل {archive_name}...")
+!tar -czf {archive_path} -C {os.path.dirname(base_dir)} {os.path.basename(base_dir)}
+
+print("\n🎉🎉🎉 عملیات با موفقیت تمام شد! 🎉🎉🎉")
+print(f"فایل فشرده کامل در مسیر زیر در گوگل درایو شما ذخیره شد:\n{archive_path}")
