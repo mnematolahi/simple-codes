@@ -1,0 +1,115 @@
+# --- مرحله ۱: نصب و اجرای اولیه اولاما ---
+import os
+import time
+
+print("⏳ در حال نصب اولاما در محیط کولب...")
+# دانلود و اجرای اسکریپت نصب رسمی اولاما
+!curl -fsSL https://ollama.com/install.sh | sh
+print("✅ اولاما با موفقیت نصب شد.")
+
+# اجرای سرور اولاما در پس‌زمینه
+!ollama serve &
+
+# کمی صبر برای اجرای کامل سرور
+print("⏳ منتظر بمانید تا سرور اولاما آماده شود...")
+time.sleep(10)
+print("✅ سرور اولاما آماده است.")
+
+
+# --- مرحله ۲: تنظیمات اصلی و لیست‌های کامل شده ---
+base_dir = "/content/drive/MyDrive/AI_Offline_Toolkit_Final"
+os.makedirs(base_dir, exist_ok=True)
+
+# === لیست کتابخانه‌های PyPI ===
+python_libraries = list(set([
+    # Core AI & Deep Learning
+    "torch", "torchvision", "torchaudio", "tensorflow", "scikit-learn", "jax", "jaxlib",
+    "pandas", "numpy", "matplotlib", "seaborn",
+    # Text & NLP
+    "transformers", "langchain", "langchain-community", "sentence-transformers", 
+    "nltk", "spacy", "gensim", "hazm", "beautifulsoup4", "scrapy",
+    "chromadb", "faiss-cpu", "llama-cpp-python", "PyMuPDF",
+    # Image Processing
+    "opencv-python-headless", "scikit-image", "Pillow", "timm", "albumentations", "fiftyone", "pdf2image",
+    # Audio Processing
+    "librosa", "pydub", "soundfile", "speechrecognition", "pyannote.audio",
+    # MLOps & Utilities
+    "mlflow", "wandb", "optuna", "fastapi", "uvicorn", "gradio", "streamlit", "tqdm", "jupyter", "PyYAML",
+    # Quantization & Performance
+    "bitsandbytes", "accelerate", "vllm", "optimum", "auto-gptq"
+]))
+
+# === لیست مدل‌های هوش مصنوعی (Ollama) ===
+models_to_pull = [
+    "llama3", "qwen2:7b", "mistral", "gemma:7b", "command-r", "codestral", "deepseek-coder"
+]
+
+# === لیست پروژه‌های GitHub ===
+github_repos_to_clone = {
+    "ai_student_assistant": "https://github.com/alimoazzam123/ai-student-assistant.git",
+    "llama_cpp": "https://github.com/ggerganov/llama.cpp.git",
+    "text_generation_webui": "https://github.com/oobabooga/text-generation-webui.git",
+    "ollama": "https://github.com/ollama/ollama.git",
+    "open_webui": "https://github.com/open-webui/open-webui.git",
+    "v2ray_core": "https://github.com/v2ray/v2ray-core.git",
+    "nekoray": "https://github.com/MatsuriDayo/nekoray.git",
+    "proxychains_ng": "https://github.com/rofl0r/proxychains-ng.git",
+    "tor": "https://github.com/torproject/tor.git",
+    "opnsense_core": "https://github.com/opnsense/core.git"
+}
+
+
+# --- مرحله ۳: ساخت پوشه‌ها و شروع دانلود ---
+pypi_dir = os.path.join(base_dir, "PyPI_Libraries")
+models_dir = os.path.join(base_dir, "Ollama_Models_and_App")
+github_dir = os.path.join(base_dir, "GitHub_Projects")
+
+os.makedirs(pypi_dir, exist_ok=True); os.makedirs(models_dir, exist_ok=True); os.makedirs(github_dir, exist_ok=True)
+print(f"\nساختار پوشه در مسیر {base_dir} ایجاد شد.")
+
+# ۱. دانلود کتابخانه‌های PyPI
+print("\n⏳ شروع دانلود کتابخانه‌های PyPI...")
+requirements_path = "/content/requirements.txt"
+with open(requirements_path, "w") as f: f.write("\n".join(python_libraries))
+!pip download --no-deps -r {requirements_path} -d {pypi_dir}
+print("✅ دانلود کتابخانه‌های PyPI تمام شد.")
+
+# ۲. دانلود اولاما و مدل‌های آن
+print("\n⏳ شروع دانلود مدل‌ها با اولاما...")
+for model in models_to_pull:
+    print(f"\n--- 📥 در حال دانلود مدل: {model} ---")
+    !ollama pull {model}
+print("✅ دانلود مدل‌های اولاما تمام شد.")
+
+# ۳. دانلود پروژه‌های گیت‌هاب
+print("\n⏳ شروع دانلود پروژه‌های گیت‌هاب...")
+for name, url in github_repos_to_clone.items():
+    try:
+        target_path = os.path.join(github_dir, name)
+        if not os.path.exists(target_path):
+            print(f"--- در حال کلون کردن پروژه: {name} ---")
+            !git clone {url} {target_path}
+        else:
+            print(f"--- پوشه پروژه {name} از قبل وجود دارد. از کلون کردن صرف نظر شد. ---")
+    except Exception as e:
+        print(f"❌ خطایی در کلون کردن پروژه {name} رخ داد: {e}")
+print("✅ دانلود پروژه‌های گیت‌هاب تمام شد.")
+
+
+# --- مرحله ۴: آرشیو کردن کل پکیج ---
+print("\n" + "="*50)
+print("⏳ در حال آرشیو کردن اولاما و مدل‌های آن برای انتقال...")
+print("="*50)
+
+# اتصال به گوگل درایو برای ذخیره فایل نهایی
+from google.colab import drive
+drive.mount('/content/drive')
+
+# تعریف نام و مسیر فایل خروجی
+archive_path = f"/content/drive/MyDrive/Ollama_Offline_Package_Complete.tar.gz"
+
+# فشرده‌سازی فایل اجرایی اولاما و پوشه مدل‌ها
+!tar -czf {archive_path} /usr/local/bin/ollama /root/.ollama
+print(f"✅ پکیج اولاما در فایل {archive_path} ذخیره شد.")
+
+print("\n\n🎉🎉🎉 تمام عملیات دانلود با موفقیت انجام شد. فایل‌ها و آرشیوها در گوگل درایو شما ذخیره شدند. 🎉🎉🎉")
